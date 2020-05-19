@@ -19,7 +19,7 @@ def read_from_csv():
             list_of_dict.append(row)
         return list_of_dict
 
-def cvs_reader:
+def cvs_reader():
     return_list = []
     with open('file.csv') as csv_file:
         file_read = csv.reader(csv_file)
