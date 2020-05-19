@@ -1,6 +1,5 @@
 """Writes user input to a CSV file"""
 
-import json
 from read_write_csv import write_to_csv, read_from_csv
 
 list_of_book = read_from_csv()
