@@ -1,3 +1,5 @@
+import aiohttp
+import asyncio
 import logging
 import requests
 from pages.all_books_page import Page
@@ -11,9 +13,24 @@ logger = logging.getLogger('scraping')
 request = requests.get('http://books.toscrape.com/catalogue/page-1.html').content
 page = Page(request)
 books = page.book_list
+loop = asyncio.get_event_loop()
+
+async def get_session(session, url):
+    async with session.get(url) as response:
+        return await response.text()
 
 
-for p in range(1, page.page_number):
-    url = requests.get(f'http://books.toscrape.com/catalogue/page-{p+1}.html').content
-    url_page = Page(url)
-    books.extend(url_page.book_list)
+async def session_creator(loop, *urls):
+    tasks = []
+    async with aiohttp.ClientSession(loop=loop) as session:
+        for url_link in urls:
+            tasks.append(get_session(session, url_link))
+        return await asyncio.gather(*tasks)
+
+
+urls = [f'http://books.toscrape.com/catalogue/page-{x+1}.html' for x in range(1, page.page_number)]
+page_loop = loop.run_until_complete(session_creator(loop, *urls))
+
+for p_l in page_loop:
+    page = Page(p_l)
+    books.extend(page.book_list)
